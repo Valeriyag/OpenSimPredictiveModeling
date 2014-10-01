@@ -1,0 +1,109 @@
+Updating Model file from 30000 to latest format...
+Loaded model arm26_optimize from file Arm26_Optimize.osim
+Updating Model file from 30000 to latest format...
+Loaded model arm26_optimize from file Arm26_Optimize.osim
+Loaded model TugOfWar from file tug_of_war_muscles_controller.osim
+Body 'Block' not connected by a Joint a FreeJoint will be added to connect it to ground.
+Running tool tugOfWar.
+No external loads will be applied (external loads file not specified).
+MODEL: TugOfWar
+
+ANALYSES (0)
+
+BODIES (2)
+body[0] = ground (mass: 0)Body 'ground' is massless but nonzero inertia provided. Inertia reset to zero. Otherwise provide nonzero mass.
+ (inertia: [~[0,0,0]  ~[0,0,0]])
+body[1] = Block (mass: 20) (inertia: [~[1,0,0]  ~[1,0,1]])
+
+ACTUATORS (2)
+actuator[0] = muscle1
+actuator[1] = muscle2
+numStates = 17
+numCoordinates = 6
+numSpeeds = 6
+numActuators = 2
+numBodies = 2
+numConstraints = 0
+numProbes = 0
+
+STATES (16)
+y[0] = free_Block/free_Block_xRotation/free_Block_xRotation
+y[1] = free_Block/free_Block_xRotation/free_Block_xRotation_u
+y[2] = free_Block/free_Block_yRotation/free_Block_yRotation
+y[3] = free_Block/free_Block_yRotation/free_Block_yRotation_u
+y[4] = free_Block/free_Block_zRotation/free_Block_zRotation
+y[5] = free_Block/free_Block_zRotation/free_Block_zRotation_u
+y[6] = free_Block/free_Block_xTranslation/free_Block_xTranslation
+y[7] = free_Block/free_Block_xTranslation/free_Block_xTranslation_u
+y[8] = free_Block/free_Block_yTranslation/free_Block_yTranslation
+y[9] = free_Block/free_Block_yTranslation/free_Block_yTranslation_u
+y[10] = free_Block/free_Block_zTranslation/free_Block_zTranslation
+y[11] = free_Block/free_Block_zTranslation/free_Block_zTranslation_u
+y[12] = muscle1/activation
+y[13] = muscle1/fiber_length
+y[14] = muscle2/activation
+y[15] = muscle2/fiber_length
+
+
+Integrating from 0 to 3
+ForwardTool::run() caught exception 
+SimTK Exception thrown at Integrator.cpp:431:
+  Integrator initialization failed apparently because:
+SimTK Exception thrown at SmallMatrixMixed.h:878:
+  Error detected by Simbody method lapackInverse(Mat<>): Matrix is singular so can't be inverted (Lapack getrf info=-4).
+  (Required condition 'info==0' was not met.)
+
+Printing results of investigation tugOfWar to ./.
+Updating Model file from 30000 to latest format...
+Loaded model tugOfWar from file tugOfWar_model.osim
+Updating Model file from 30000 to latest format...
+Loaded model tugOfWar from file tugOfWar_model.osim
+Updating Model file from 30000 to latest format...
+Loaded model arm26_optimize from file Arm26_Optimize.osim
+Running tool tugOfWar.
+No external loads will be applied (external loads file not specified).
+MODEL: arm26_optimize
+
+ANALYSES (0)
+
+BODIES (3)
+body[0] = ground (mass: 0)Body 'ground' is massless but nonzero inertia provided. Inertia reset to zero. Otherwise provide nonzero mass.
+ (inertia: [~[0,0,0]  ~[0,0,0]])
+body[1] = r_humerus (mass: 1.86457) (inertia: [~[0.01481,0.004551,0.013193]  ~[0,0,0]])
+body[2] = r_ulna_radius_hand (mass: 1.53432) (inertia: [~[0.019281,0.001571,0.020062]  ~[0,0,0]])
+
+ACTUATORS (6)
+actuator[0] = TRIlong
+actuator[1] = TRIlat
+actuator[2] = TRImed
+actuator[3] = BIClong
+actuator[4] = BICshort
+actuator[5] = BRA
+numStates = 16
+numCoordinates = 2
+numSpeeds = 2
+numActuators = 6
+numBodies = 3
+numConstraints = 0
+numProbes = 0
+
+STATES (16)
+y[0] = r_shoulder/r_shoulder_elev/r_shoulder_elev
+y[1] = r_shoulder/r_shoulder_elev/r_shoulder_elev_u
+y[2] = r_elbow/r_elbow_flex/r_elbow_flex
+y[3] = r_elbow/r_elbow_flex/r_elbow_flex_u
+y[4] = TRIlong/activation
+y[5] = TRIlong/fiber_length
+y[6] = TRIlat/activation
+y[7] = TRIlat/fiber_length
+y[8] = TRImed/activation
+y[9] = TRImed/fiber_length
+y[10] = BIClong/activation
+y[11] = BIClong/fiber_length
+y[12] = BICshort/activation
+y[13] = BICshort/fiber_length
+y[14] = BRA/activation
+y[15] = BRA/fiber_length
+
+
+Integrating from 0 to 3
