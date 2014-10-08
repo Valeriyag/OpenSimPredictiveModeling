@@ -1,16 +1,16 @@
-function [x_dot] = OpenSimPlantFunction(t, x, controlsFuncHandle, osimModel, ...
-    osimState)
-%OpenSimPlantFunction - This function allows for an opensim model to
-% be integrated using a MATLAB solver.
+function [x_dot] = plantFunctionOpenSim(t, x, controlsFuncHandle, osimModel, ...
+    osimState,tp,P)
+
+%plantFunctionOpenSim - wraps an OpenSimModel and an OpenSimState into a 
+%   function which can be passed as a input to a Matlab integrator, such as
+%   ode45, or an optimization routine, such as fmin.
 %
 %  This function is a modified version of OpenSim's Dynamic Walking
 %  Example.
 %
-%OpenSimPlantFunction  
-%   x_dot = OpenSimPlantFunction(t, x, controlsFuncHandle, osimModel, 
-%   osimState) converts an OpenSimModel and an OpenSimState into a 
-%   function which can be passed as a input to a Matlab integrator, such as
-%   ode45, or an optimization routine, such as fmin.
+%  x_dot = OpenSimPlantFunction(t, x, controlsFuncHandle, osimModel, 
+%   osimState)
+%
 %
 % Input:
 %   t is the time at the current step
@@ -22,7 +22,6 @@ function [x_dot] = OpenSimPlantFunction(t, x, controlsFuncHandle, osimModel, ...
 %
 % Output:
 %   x_dot is a Matlab column matrix of the derivative of the state values
-% -----------------------------------------------------------------------
 
     % Error Checking
     if(~isa(osimModel, 'org.opensim.modeling.Model'))
@@ -66,7 +65,7 @@ function [x_dot] = OpenSimPlantFunction(t, x, controlsFuncHandle, osimModel, ...
     
     % Update model with control values
     if(~isempty(controlsFuncHandle))
-       controlVector = controlsFuncHandle(osimModel,osimState);
+       controlVector = controlsFuncHandle(osimModel,osimState,tp,P);
        osimModel.setControls(osimState, controlVector);
        for i = 1:osimModel.getNumControls()
            controlValues(i) = controlVector.get(i-1);
