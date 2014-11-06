@@ -64,7 +64,29 @@ end
 % Create a anonymous handle to the OpenSim plant function.  The
 % variables osimModel and osimState are held in the workspace and
 % passed as arguments
-plantHandle = @(t,x) plantFunctionOpenSim(t, x, controlsFuncHandle, osimModel, osimState,tp,P);
+
+
+
+if ~isempty(controlsFuncHandle)
+    for m=1:size(P,2)
+        pCoeffs(m)=spline(tp,P(:,m));
+    end
+else
+    
+    
+    updatePresContSpline;
+    pCoeffs=0;
+end
+
+
+
+%varPassedOut=[];
+plantHandle = @(t,x) plantFunctionOpenSim(t, x, controlsFuncHandle, osimModel, osimState,tp,pCoeffs);
+%varPassedOut=varPassedOut(2:end);
+
+
+
+
 
 
 % Integrate the system equations

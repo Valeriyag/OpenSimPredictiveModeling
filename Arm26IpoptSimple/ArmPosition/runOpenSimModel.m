@@ -30,6 +30,13 @@ function modelResults = evaluateOpenSimModel(osimModel, controlsFuncHandle,...
 %           contains the calculations for the OpenSim Model constraint
 %           values and objective.
 
+% Import Java libraries
+import org.opensim.modeling.*;
+
+if isempty(osimModel)
+osimModel = Model('temp.osim');
+osimState = osimModel.initSystem();
+end
 % Integrate the Plant Model
 [OutputData,osimState]= integrateOpenSimPlant(osimModel, controlsFuncHandle, timeSpan, ...
     integratorName, integratorOptions,tp,P);

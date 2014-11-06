@@ -13,8 +13,8 @@ function constr=constOpenSimModel(Pv)
 %
 %       Global Variables
 %       m - this is a global structure with "constants" used in the
-%           the analysis. m.constObjFuncName contains the name (string) 
-%           of the constraints function to be used. 
+%           the analysis. m.constObjFuncName contains the name (string)
+%           of the constraints function to be used.
 %           See objOpenSimModel for details.
 %
 %
@@ -33,8 +33,19 @@ m.osimModel.initSystem();
 % times for the spline
 Pm=reshape(Pv,[],length(m.tp))';
 
-modelResults = runOpenSimModel(m.osimModel, m.controlsFuncHandle,...
-    m.timeSpan, m.integratorName, m.integratorOptions,m.tp,Pm,m.constObjFuncName);
+
+if isequal(m.lastPm,Pm)
+    modelResults = m.lastModelResults;
+else
+    modelResults = runOpenSimModel(m.osimModel, m.controlsFuncHandle,...
+        m.timeSpan, m.integratorName, m.integratorOptions,m.tp,Pm, ...
+        m.constObjFuncName);
+    m.lastPm=Pm;
+    m.lastModelResults=modelResults;
+    m.lastGradObj=[];
+    m.lastJacConst=[];
+end
+
 
 constr=modelResults.constraints;
 
@@ -50,7 +61,7 @@ end
 display([datestr(now,13) ' Constarints: ' sprintf('%f ',constr) '(' num2str(m.runCnt) ')']);
 
 %Update the logfile
-if m.saveLog
+if ~isempty(m.saveLog)
     data.functionType=3;
     data.P=Pv;
     data.modelResults=modelResults;
@@ -62,5 +73,5 @@ if m.saveLog
     data.time=now;
     varName=['log' num2str(m.runCnt)];
     eval([varName '=data;']);
-    save('logFile',varName, 'm','-append')
+    save(m.saveLog,varName,'-append')
 end

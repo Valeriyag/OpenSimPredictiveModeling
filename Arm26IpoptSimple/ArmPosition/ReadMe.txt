@@ -59,7 +59,18 @@ evalGradOpenSimModel - evalue the gradient of the constraints and
    objective function of an OpenSimModel. 
 
 plantControlsFunctionOpenSim - This function allows for the generation of
-    varying control values during each integrator step.  
+    varying control values during each integrator step.  This is not
+    currently being used.  This is used when the control values are updated
+    by MATLAB at each integrator step.  Instead, a prescribed controller 
+    is created and the spline are performed by OpenSim.
+
+addPrescribed Controller - Create a prescribed controller that uses a set
+    of SimmSplines to produce muscle activations.    The controller is
+    created one time, but it's values are updated before each integration
+    run (once per full integration).
+
+updatePresContSpline - update the muscle control values before each
+    integartion run.
    
    
 
@@ -68,6 +79,6 @@ To do:
 
 Add warm start capability (read BestYet from logFile)
 Try Using forward Opensim tool instead of MATLAB inetgartor
-Add cache to look for repitous steps
-Code is currently not speed optimized - speed it up!
+
+
 

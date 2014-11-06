@@ -13,11 +13,11 @@ function gradObj=gradObjOpenSimModel(Pv)
 %
 %   Global Variables:
 %       m - this is a global structure with "constants" used in the
-%           the analysis. m.constObjFuncName contains the name (string) 
+%           the analysis. m.constObjFuncName contains the name (string)
 %           of the constraints function to be used. m.h determines change
 %           in control value to be used (finite differences).
 %           See objOpenSimModel for details.
-%            
+%
 %   Outputs:
 %       gradObj - a vector with the gradient for each control vector.
 
@@ -32,13 +32,25 @@ m.osimModel.initSystem();
 % times for the spline
 Pm=reshape(Pv,[],length(m.tp))';
 
-%Evalute the model (Integrate and calculate obj/const) 
-modelResults = runOpenSimModel(m.osimModel, m.controlsFuncHandle,...
-    m.timeSpan, m.integratorName, m.integratorOptions,m.tp,Pm,m.constObjFuncName);
+%Evalute the model (Integrate and calculate obj/const)
+if isequal(m.lastPm,Pm) && ~isempty(m.lastGradObj)
+    modelResults = m.lastModelResults;
+    gradObj=m.lastGradObj;
+else
+    modelResults = runOpenSimModel(m.osimModel, m.controlsFuncHandle,...
+        m.timeSpan, m.integratorName, m.integratorOptions,m.tp,Pm, ...
+        m.constObjFuncName);
+    %Using the above evaluation as a starting, get the gradient
+    [gradObj,jacConst]=evalGradOpenSimModel(modelResults,m.osimModel, m.controlsFuncHandle,...
+        m.timeSpan, m.integratorName, m.integratorOptions,m.tp,Pm,m.constObjFuncName,m.h);
+    
+    m.lastPm=Pm;
+    m.lastModelResults=modelResults;
+    m.lastGradObj=gradObj;
+    m.lastJacConst=jacConst;
+end
 
-%Using the above evaluation as a starting, get the gradient
-gradObj=evalGradOpenSimModel(modelResults,m.osimModel, m.controlsFuncHandle,...
-    m.timeSpan, m.integratorName, m.integratorOptions,m.tp,Pm,m.constObjFuncName,m.h);
+
 
 gradObj=reshape(gradObj',1,[]);  % Reshape so [c1t0....c6t0 c1t1....c6t1 c1t3....c6t3]
 
@@ -49,14 +61,14 @@ m.runCnt=m.runCnt+1;
 
 display([datestr(now,13) ' Objective Gradient Complete' '(' num2str(m.runCnt) ')'])
 
-% Update bestYet 
+% Update bestYet
 if m.bestYetValue<obj;
     m.bestYetValue=obj;
     m.bestYetIndex=m.runCnt;
 end
 
 %Update the log file to include this step
-if m.saveLog
+if ~isempty(m.saveLog)
     data.functionType=2;
     data.P=Pv;
     data.modelResults=modelResults;
@@ -68,7 +80,7 @@ if m.saveLog
     data.time=now;
     varName=['log' num2str(m.runCnt)];
     eval([varName '=data;']);
-    save('logFile',varName, 'm','-append')
+    save(m.saveLog,varName,'-append')
 end
 
 

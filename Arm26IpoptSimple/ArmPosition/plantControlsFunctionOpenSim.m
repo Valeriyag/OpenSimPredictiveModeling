@@ -1,4 +1,4 @@
-function modelControls = plantControlsFunctionOpenSim(osimModel, osimState, tp, P)
+function modelControls = plantControlsFunctionOpenSim(osimModel, osimState, tp, pCoeffs)
 %plantControlsFunctionOpenSim- This function allows for the generation of
 %   varying control values during each integrator step.  
 %
@@ -43,7 +43,10 @@ actControls = Vector(1, 0.0);
 simTime=osimState.getTime();
 
 for i=1:numControls
-    controlValue=spline(tp,P(:,i),simTime);
+    %controlValue=spline(tp,P(:,i),simTime);
+    
+    controlValue=ppval(simTime,pCoeffs(i));
+    
     
     % Set Actuator Controls Vector
     actControls.set(0, controlValue);

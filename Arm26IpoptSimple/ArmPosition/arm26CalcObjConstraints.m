@@ -49,8 +49,21 @@ constraints(1)=velocity.get(0);
 % Hand located in front 
 constraints(2)=position.get(0);
 
+
+%ind = getStateVarIndex( motionData.labels,'r_elbow/r_elbow_flex/r_elbow_flex');
+ind=3;
 % Elbow Joint Never Hyper Extend
-constraints(3)=min(motionData.data(:,3));   % This 3rd column is the elbow angle.  If the model changes, this will need to be updated.
+constraints(3)=min(motionData.data(:,ind));   % This 3rd column is the elbow angle.  If the model changes, this will need to be updated.
+constraints(4)=max(motionData.data(:,ind));   % This 3rd column is the elbow angle.  If the model changes, this will need to be updated.
+
+
+%ind = getStateVarIndex( motionData.labels,'r_shoulder/r_shoulder_elev/r_shoulder_elev');
+% Shoulder Joint Never Hyper Extend
+ind=2;
+constraints(5)=min(motionData.data(:,ind));   % This 3rd column is the elbow angle.  If the model changes, this will need to be updated.
+constraints(6)=max(motionData.data(:,ind));   % This 3rd column is the elbow angle.  If the model changes, this will need to be updated.
+
+
 
 % Dummy Constraint for troubleshooting
 %constraints(4)=0;

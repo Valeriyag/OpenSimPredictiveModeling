@@ -1,4 +1,4 @@
-function [gradObj,gradC,gradModelResultsOut]=evalGradOpenSimModel(...
+function [gradObj,jacConst,gradModelResultsOut]=evalGradOpenSimModel(...
     modelResults,osimModel, controlsFuncHandle, timeSpan,...
     integratorName, integratorOptions,tp,P,constObjFuncName,h)
 % evalGradOpenSimModel - evalue the gradient of the constraints and
@@ -12,7 +12,7 @@ function [gradObj,gradC,gradModelResultsOut]=evalGradOpenSimModel(...
 %  For IPOPT, this function is wrapped in the anouynmous functions:
 %       gradObjOpenSimModel and jacConstOpenSimModel
 %
-%   [gradObj,gradC,gradModelResultsOut]=evalGradOpenSimModel(...
+%   [gradObj,jacConst,gradModelResultsOut]=evalGradOpenSimModel(...
 %       modelResults,osimModel, controlsFuncHandle, timeSpan,...
 %       integratorName, integratorOptions,tp,P,constObjFuncName,h)
 %
@@ -43,13 +43,14 @@ function [gradObj,gradC,gradModelResultsOut]=evalGradOpenSimModel(...
 % Outputs:
 %   gradObj: The gradient of the objective. This is a two dimensional
 %       matrix: rows: time, columns: control
-%   gradC: The jacobian of the constraints.  This is a 3 dimensional
+%   jacConst: The jacobian of the constraints.  This is a 3 dimensional
 %       matrix: rows: time, columns: control, page: constraint 
 
 
-osimModel.initSystem();
 
 
+% Import Java libraries
+import org.opensim.modeling.*;
 
 
 numConstraints=length(modelResults.constraints);
@@ -58,21 +59,43 @@ numControls=size(P,2); %P Each Column is Control
 
 numGrad=0;
 
+
+% osimModel.print('temp.osim');
+% osimModel=[];
+
+
+     
+        
+        
 for i=1:numTime
+    
+    
+    
+    
     for j=1:numControls
-        numGrad=numGrad+1;
+        %numGrad=numGrad+1;
+        
+        numGrad=((i-1)*numControls)+j;
         
         display([datestr(now,13) ' Gradient Step ' num2str(numGrad) ...
-            ' of ' num2str(numTime*numControls)])
+           ' of ' num2str(numTime*numControls)])
         
+        
+
+        %display([num2str(i) ':' num2str(j)])
+
         Pn=P;
-        
         Pn(i,j)=Pn(i,j)+h;
+        %osimModel2=osimModArray(j);
         
+        %osimModel2=osimModel.clone();
         %Evaluate the model at P+h
         dModelResults = runOpenSimModel(osimModel, ... 
             controlsFuncHandle, timeSpan, integratorName, ...
             integratorOptions,tp,Pn, constObjFuncName);
+
+
+
         
         gradObj(i,j)=(dModelResults.objective - modelResults.objective)/h;
         
@@ -80,15 +103,17 @@ for i=1:numTime
         %Calculate the jacobian of the constraints
         %3dim matrix: row(i): time, column(j) control, page(k) constraint 
         for k=1:numConstraints
-            gradC(i,j,k) = (dModelResults.constraints(k) - ....
+            jacConst(i,j,k) = (dModelResults.constraints(k) - ....
                 modelResults.constraints(k))/h;
         end  
         
         %If the gradient Model results are requested, put them in a 
         %structure to be output.
-        if nargout>2
-           gradModelResultsOut{numGrad} = dModelResults;
-        end
+%         if nargout>2
+%            gradModelResultsOut{numGrad} = dModelResults;
+%         end
         
     end
 end
+
+gradModelResultsOut=[];

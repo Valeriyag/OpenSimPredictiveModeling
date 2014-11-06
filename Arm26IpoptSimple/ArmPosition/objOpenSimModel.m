@@ -17,17 +17,17 @@ function obj=objOpenSimModel(Pv)
 %                       used.
 %               m. controlsFunctionHandle:  A handle to model specific function that
 %                   contains the calculations for the OpenSim Model controls.
-%               m.timeSpan: The time span to integrate over 
-%                   (see IntegrateOpenSimPlant).  
+%               m.timeSpan: The time span to integrate over
+%                   (see IntegrateOpenSimPlant).
 %                   [0 2] will integrate from 0 to 2 seconds.
 %               m.integratorName: String containg the name of the integrator to be
 %                   used.  For example: 'ode15s'
 %               m.integratorOptions: Structure containing integrator options.  See
-%                   ode15s for examples.  
+%                   ode15s for examples.
 %                   integratorOptions = odeset('AbsTol', (1E-05), 'RelTol', (1E-03));
 %               m.tp:  A vector of times at which the control values are provided.
 %               m.saveLog: If a filename is provided
-%                   
+%
 %
 %   Outputs:
 %       obj - objective scaler that is being minimzed
@@ -40,11 +40,27 @@ m.osimModel.initSystem();
 
 % Unflatten the controls vector to a matrix (columns are controls, rows are
 % times for the spline
+
+i=find(Pv>1);
+Pv(i)=1;
+
+i=find(Pv<0);
+Pv(i)=0;
+
 Pm=reshape(Pv,[],length(m.tp))';
 
-modelResults = runOpenSimModel(m.osimModel, m.controlsFuncHandle,...
-    m.timeSpan, m.integratorName, m.integratorOptions,m.tp,Pm, ... 
-    m.constObjFuncName);
+
+if isequal(m.lastPm,Pm)
+    modelResults = m.lastModelResults;
+else
+    modelResults = runOpenSimModel(m.osimModel, m.controlsFuncHandle,...
+        m.timeSpan, m.integratorName, m.integratorOptions,m.tp,Pm, ...
+        m.constObjFuncName);
+    m.lastPm=Pm;
+    m.lastModelResults=modelResults;
+    m.lastGradObj=[];
+    m.lastJacConst=[];
+end
 
 obj=modelResults.objective;
 
@@ -58,11 +74,11 @@ if m.bestYetValue<obj;
 end
 
 
-display([datestr(now,13) ' Objective: ' sprintf('%f ',obj) '(' ... 
+display([datestr(now,13) ' Objective: ' sprintf('%f ',obj) '(' ...
     num2str(m.runCnt) ')']);
 
 %Update the log file.
-if m.saveLog
+if ~isempty(m.saveLog)
     data.functionType=1;
     data.P=Pv;
     data.modelResults=modelResults;
@@ -75,5 +91,5 @@ if m.saveLog
     data.bestYetValue=m.bestYetValue;
     varName=['log' num2str(m.runCnt)];
     eval([varName '=data;']);
-    save('logFile',varName, 'm','-append')
+    save(m.saveLog,varName,'-append')
 end

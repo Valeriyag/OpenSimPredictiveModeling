@@ -1,5 +1,5 @@
 function [x_dot] = plantFunctionOpenSim(t, x, controlsFuncHandle, osimModel, ...
-    osimState,tp,P)
+    osimState,tp,pCoeffs)
 
 %plantFunctionOpenSim - wraps an OpenSimModel and an OpenSimState into a 
 %   function which can be passed as a input to a Matlab integrator, such as
@@ -22,6 +22,8 @@ function [x_dot] = plantFunctionOpenSim(t, x, controlsFuncHandle, osimModel, ...
 %
 % Output:
 %   x_dot is a Matlab column matrix of the derivative of the state values
+
+import org.opensim.modeling.*;
 
     % Error Checking
     if(~isa(osimModel, 'org.opensim.modeling.Model'))
@@ -63,9 +65,9 @@ function [x_dot] = plantFunctionOpenSim(t, x, controlsFuncHandle, osimModel, ...
     % Update the state velocity calculations
     osimModel.computeStateVariableDerivatives(osimState);
     
-    % Update model with control values
+    % Update model with control values if a control function is provided
     if(~isempty(controlsFuncHandle))
-       controlVector = controlsFuncHandle(osimModel,osimState,tp,P);
+       controlVector = controlsFuncHandle(osimModel,osimState,tp,pCoeffs);
        osimModel.setControls(osimState, controlVector);
        for i = 1:osimModel.getNumControls()
            controlValues(i) = controlVector.get(i-1);
@@ -75,9 +77,18 @@ function [x_dot] = plantFunctionOpenSim(t, x, controlsFuncHandle, osimModel, ...
     % Update the derivative calculations in the State Variable
     osimModel.computeStateVariableDerivatives(osimState);
     
+%     varToPassOut = arm26_AddOutValues(osimModel,osimState);
+%     assignin('caller','varInBase',varToPassOut);
+%     evalin('caller','varPassedOut(end+1)=varInBase;')
+%     
+
+    
     x_dot = zeros(numVar,1);
     % Set output variable to new state
     for i = 0:1:numVar-1
         x_dot(i+1,1) = osimState.getYDot().get(i);
     end
+    
+    
+    
 end

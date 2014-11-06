@@ -36,21 +36,34 @@ m.osimModel.initSystem();
 % times for the spline
 Pm=reshape(Pv,[],length(m.tp))';
 
-modelResults = runOpenSimModel(m.osimModel, m.controlsFuncHandle,...
-    m.timeSpan, m.integratorName, m.integratorOptions,m.tp,Pm,m.constObjFuncName);
+%Evalute the model (Integrate and calculate obj/const)
+if isequal(m.lastPm,Pm) && ~isempty(m.lastJacConst)
+    modelResults = m.lastModelResults;
+    jacConst=m.lastJacConst;
+else
+    modelResults = runOpenSimModel(m.osimModel, m.controlsFuncHandle,...
+        m.timeSpan, m.integratorName, m.integratorOptions,m.tp,Pm, ...
+        m.constObjFuncName);
+    %Using the above evaluation as a starting, get the gradient
+    [gradObj,jacConst]=evalGradOpenSimModel(modelResults,m.osimModel, m.controlsFuncHandle,...
+        m.timeSpan, m.integratorName, m.integratorOptions,m.tp,Pm,m.constObjFuncName,m.h);
+    
+    m.lastPm=Pm;
+    m.lastModelResults=modelResults;
+    m.lastGradObj=gradObj;
+    m.lastJacConst=jacConst;
+end
 
-%Using the above evaluation as a starting, get the gradient
-[gradObj,gradConst]=evalGradOpenSimModel(modelResults,m.osimModel, m.controlsFuncHandle,...
-    m.timeSpan, m.integratorName, m.integratorOptions,m.tp,Pm,m.constObjFuncName,m.h);
+
 
 %Flatten 3dim matrix into 2 dim matrix where:
 %      each row is for a constraint.  Columns match Pv
-for i=1:size(gradConst,3)
-    jacConst(i,:)=reshape(gradConst(:,:,i)',[],1)';
+for i=1:size(jacConst,3)
+    jacConstTemp(i,:)=reshape(jacConst(:,:,i)',[],1)';
 end
 
-%Make sparse (doubtful any 0s though
-jacConst=sparse(jacConst);
+%Make sparse (doubtful any 0s though)
+jacConst=sparse(jacConstTemp);
 
 obj=modelResults.objective;
 
@@ -66,7 +79,7 @@ if m.bestYetValue<obj;
 end
 
 %update the logFile
-if m.saveLog
+if ~isempty(m.saveLog)
     data.functionType=4;
     data.P=Pv;
     data.modelResults=modelResults;
@@ -78,7 +91,7 @@ if m.saveLog
     data.time=now;
     varName=['log' num2str(m.runCnt)];
     eval([varName '=data;']);
-    save('logFile',varName, 'm','-append')
+    save(m.saveLog,varName,'-append')
 end
 
 
