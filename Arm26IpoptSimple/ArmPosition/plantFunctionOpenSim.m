@@ -63,15 +63,15 @@ import org.opensim.modeling.*;
     end
     
     % Update the state velocity calculations
-    osimModel.computeStateVariableDerivatives(osimState);
+    %osimModel.computeStateVariableDerivatives(osimState);
     
     % Update model with control values if a control function is provided
     if(~isempty(controlsFuncHandle))
-       controlVector = controlsFuncHandle(osimModel,osimState,tp,pCoeffs);
+       controlVector = controlsFuncHandle(osimModel,osimState,tp,pCoeffs);    %Should just give it the time, not ask for it from the model 12-17-14 Mtg with Ton
        osimModel.setControls(osimState, controlVector);
-       for i = 1:osimModel.getNumControls()
-           controlValues(i) = controlVector.get(i-1);
-       end
+%        for i = 1:osimModel.getNumControls()     %Remove?  Just for testing?  12-17-14 Mtg with Ton
+%            controlValues(i) = controlVector.get(i-1);
+%        end
     end
     
     % Update the derivative calculations in the State Variable
@@ -88,7 +88,7 @@ import org.opensim.modeling.*;
     for i = 0:1:numVar-1
         x_dot(i+1,1) = osimState.getYDot().get(i);
     end
-    
+    a=1;
     
     
 end

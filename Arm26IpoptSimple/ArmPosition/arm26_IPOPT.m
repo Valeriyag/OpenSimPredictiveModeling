@@ -7,7 +7,7 @@
 % Load Library
 import org.opensim.modeling.*;
 
-osimModelName='OpenSimModels/Arm26WithDelts/Arm28_Optimize.osim';
+osimModelName='OpenSimModels/Arm26WithDelts/Arm28_Optimize_Equib.osim';
 
 % Open a Model by name
 osimModel = Model(osimModelName);
@@ -36,15 +36,24 @@ controlsFuncHandle = [];  % Controls function
 
 % Initial Control Values
 numControls=osimModel.getNumControls();
-tp=[0 1 2];
+tp=[1 2];
 P=ones(length(tp),numControls);
 
 %Values derived from static holding the arm in place (developed in OpenSim
 %run
-a=[ 0.05000000,0.05000000,0.05000000,0.09572922,0.10845805,0.07009430,0.05000000,0.10712417];
-P(1,:)=P(1,:).*a; %All controls at time 0 = 0.01
-P(2,:)=P(2,:).*a; %All controls at Time 1 = 0.02
-P(3,:)=P(3,:).*a; %All controls at Time 2 = 0.03
+%a=[ 0.05000000,0.05000000,0.05000000,0.09572922,0.10845805,0.07009430,0.05000000,0.10712417];
+
+actCnt=1;
+for c=5:2:(osimState.getY().size)
+
+    PInit(actCnt)=osimState.getY.get(c-1);
+        actCnt=actCnt+1;
+end
+
+
+P(1,:)=P(1,:).*PInit; %All controls at time 0 = 0.01
+P(2,:)=P(2,:).*PInit; %All controls at Time 1 = 0.02
+%P(3,:)=P(3,:).*PInit; %All controls at Time 2 = 0.03
 
 
 % Add a prescribed controller if a controls function is not provided
@@ -69,6 +78,7 @@ save(logFileName,'osimModelName')
 
 % Setup needed global for storing "fixed" parameters
 global m
+m.PInit=PInit;
 m.osimModel=osimModel;
 m.controlsFuncHandle=controlsFuncHandle;
 m.timeSpan=timeSpan;
@@ -93,8 +103,8 @@ m.lastJacConst=[];
 % Set the IPOPT constraints
 options.lb = 0.05.*ones(1,length(Po));  % Lower bound on the variables.
 options.ub = 1.*ones(1,length(Po));  % Upper bound on the variables.
-options.cl = [-0.001  0 15*pi/180 15*pi/180 -70*pi/180 160*pi/180];   % Lower bounds on the constraint functions.
-options.cu = [0.001 inf 130*pi/180 130*pi/180 -70*pi/180 160*pi/180];   % Upper bounds on the constraint functions.
+options.cl = [-0.001  0 15*pi/180 15*pi/180 -70*pi/180 -70*pi/180];   % Lower bounds on the constraint functions.       %!!!! 5th and 6th constraints need to be fixed  - putting the shoulder in equality constraint.  12-17-14 Mtg with Ton
+options.cu = [0.001 inf 130*pi/180 130*pi/180 160*pi/180 160*pi/180];   % Upper bounds on the constraint functions.
 
 % Set the IPOPT options
 options.ipopt.jac_c_constant        = 'yes';

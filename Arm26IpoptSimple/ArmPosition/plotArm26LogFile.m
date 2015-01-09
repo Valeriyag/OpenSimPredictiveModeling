@@ -4,7 +4,7 @@
 clear,close all
 
 % Load the log file into variable logData
-logData=load('Results/logfile_14-11-05-23-29-01');
+logData=load('Results/logfile_15-01-05-22-06-52');
 
 %runCnt=logData.m.runCnt;  %Number of Steps Completed
 
@@ -25,7 +25,7 @@ for i=1:runCnt
     constr(i,:)=tempValue.modelResults.constraints;
     
     %get the control values into an array
-    Ptemp=reshape(tempValue.P,8,3)';   %Reshape from vector to matrix format
+    Ptemp=reshape(tempValue.P,3,8);   %Reshape from vector to matrix format
     for m=1:8  %^ muscles in this model
         if i==1
             P{m}=Ptemp(:,m);
@@ -70,10 +70,6 @@ subplot(7,1,7)
 plot(constr(:,6)*180/pi)
 ylabel({'Max Shoulder','[-70 160] (deg)'})
 xlabel('Step #')
-
-
-%options.cl = [-0.001  0 15*pi/180 15*pi/180 -70*pi/180 160*pi/180];   % Lower bounds on the constraint functions.
-%options.cu = [0.001 inf 130*pi/180 130*pi/180 -70*pi/180 160*pi/180];   % Upper bounds on the constraint functions.
 
 
 figH(1)=gcf;

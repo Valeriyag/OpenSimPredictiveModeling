@@ -47,11 +47,8 @@ function [gradObj,jacConst,gradModelResultsOut]=evalGradOpenSimModel(...
 %       matrix: rows: time, columns: control, page: constraint 
 
 
-
-
 % Import Java libraries
 import org.opensim.modeling.*;
-
 
 numConstraints=length(modelResults.constraints);
 numTime=size(P,1); %P Each Row is Time
@@ -59,61 +56,53 @@ numControls=size(P,2); %P Each Column is Control
 
 numGrad=0;
 
-
 % osimModel.print('temp.osim');
 % osimModel=[];
 
-
-     
-        
-        
-for i=1:numTime
-    
-    
-    
+for i=2:numTime
     
     for j=1:numControls
         %numGrad=numGrad+1;
         
-        numGrad=((i-1)*numControls)+j;
+        numGrad=((i-2)*numControls)+j;
         
         display([datestr(now,13) ' Gradient Step ' num2str(numGrad) ...
-           ' of ' num2str(numTime*numControls)])
+           ' of ' num2str((numTime-1)*numControls)])
         
-        
-
-        %display([num2str(i) ':' num2str(j)])
-
         Pn=P;
         Pn(i,j)=Pn(i,j)+h;
         %osimModel2=osimModArray(j);
         
         %osimModel2=osimModel.clone();
         %Evaluate the model at P+h
+        
+        osimModel.initSystem();
+        
         dModelResults = runOpenSimModel(osimModel, ... 
             controlsFuncHandle, timeSpan, integratorName, ...
             integratorOptions,tp,Pn, constObjFuncName);
 
-
-
-        
-        gradObj(i,j)=(dModelResults.objective - modelResults.objective)/h;
-        
-        
+        gradObj(i-1,j)=(dModelResults.objective - modelResults.objective)/h;
+               
         %Calculate the jacobian of the constraints
         %3dim matrix: row(i): time, column(j) control, page(k) constraint 
         for k=1:numConstraints
-            jacConst(i,j,k) = (dModelResults.constraints(k) - ....
+            jacConst(i-1,j,k) = (dModelResults.constraints(k) - ....
                 modelResults.constraints(k))/h;
         end  
         
         %If the gradient Model results are requested, put them in a 
         %structure to be output.
-%         if nargout>2
-%            gradModelResultsOut{numGrad} = dModelResults;
-%         end
+        if nargout>2
+           gradModelResultsOut.dModelResults{numGrad} = dModelResults;
+           gradModelResultsOut.h{numGrad} = h;
+           gradModelResultsOut.P{numGrad} = P;
+           gradModelResultsOut.Pn{numGrad} = Pn;
+           gradModelResultsOut.modelResults{numGrad} = modelResults;
+        else
+            gradModelResultsOut=[];
+        end
         
     end
 end
 
-gradModelResultsOut=[];

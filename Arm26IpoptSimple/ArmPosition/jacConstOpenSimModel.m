@@ -36,6 +36,9 @@ m.osimModel.initSystem();
 % times for the spline
 Pm=reshape(Pv,[],length(m.tp))';
 
+tp=[0 m.tp];
+Pm=[m.PInit ;Pm];
+
 %Evalute the model (Integrate and calculate obj/const)
 if isequal(m.lastPm,Pm) && ~isempty(m.lastJacConst)
     modelResults = m.lastModelResults;
@@ -81,7 +84,7 @@ end
 %update the logFile
 if ~isempty(m.saveLog)
     data.functionType=4;
-    data.P=Pv;
+    data.P=Pm;
     data.modelResults=modelResults;
     data.runCnt=m.runCnt;
     data.obj=[];

@@ -8,7 +8,7 @@
 % Load Library
 import org.opensim.modeling.*;
 
-osimModelName='OpenSimModels/Arm26WithDelts/Arm28_Optimize.osim';
+osimModelName='OpenSimModels/Arm26WithDelts/Arm28_Optimize_Equib.osim';
 
 % Open a Model by name
 osimModel = Model(osimModelName);
@@ -37,15 +37,20 @@ controlsFuncHandle = [];  % Controls function
 
 % Initial Control Values
 numControls=osimModel.getNumControls();
-tp=[0 1 2];
+tp=[1 2];
 P=ones(length(tp),numControls);
 
+actCnt=1;
+for c=5:2:(osimState.getY().size)
 
-a=[	      0.05000000	      0.05000000	      0.05000000	      0.09572922	      0.10845805	      0.07009430	      0.05000000	      0.10712417];
-a=0.9;
-P(1,:)=P(1,:).*a; %All controls at time 0 = 0.01
-P(2,:)=P(2,:).*a; %All controls at Time 1 = 0.02
-P(3,:)=P(3,:).*a; %All controls at Time 2 = 0.03
+    PInit(actCnt)=osimState.getY.get(c-1);
+        actCnt=actCnt+1;
+end
+
+
+P(1,:)=P(1,:).*PInit; %All controls at time 0 = 0.01
+P(2,:)=P(2,:).*PInit; %All controls at Time 1 = 0.02
+%P(3,:)=P(3,:).*PInit; %All controls at Time 2 = 0.03
 
 
 % Add a prescribed controller if a controls function is not provided
@@ -70,6 +75,7 @@ save(logFileName,'osimModelName')
 
 % Setup needed global for storing "fixed" parameters
 global m
+m.PInit=PInit;
 m.osimModel=osimModel;
 m.controlsFuncHandle=controlsFuncHandle;
 m.timeSpan=timeSpan;

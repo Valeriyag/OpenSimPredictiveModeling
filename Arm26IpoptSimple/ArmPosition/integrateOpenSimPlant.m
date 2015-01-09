@@ -47,6 +47,8 @@ if(~isempty(controlsFuncHandle))
     end
 end
 
+%osimModel.equilibrateMuscles();
+
 % Check to see if model state is initialized by checking size
 if(osimModel.getWorkingState().getNY() == 0)
     osimState = osimModel.initSystem();
@@ -56,6 +58,10 @@ end
 
 % Create the Initial State matrix from the Opensim state
 numVar = osimState.getY().size();
+
+
+
+
 InitStates = zeros(numVar,1);
 for i = 0:1:numVar-1
     InitStates(i+1,1) = osimState.getY().get(i);

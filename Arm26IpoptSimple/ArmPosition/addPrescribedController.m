@@ -9,12 +9,16 @@
 % spline are determined by the optimizer input, P.  See script
 % updatePresContSpline for how the controller values are updated.
 
+%Append zero values
+tpWith0=[0 tp];
+PWith0=[PInit ;P];
+
 
 numActuators=osimModel.getActuators.getSize;
 
-numTimePts=length(tp);
+numTimePts=length(tpWith0);
 
-if numActuators~=size(P,2)
+if numActuators~=size(PWith0,2)
     error('addPrescribedController:  Number of P Columns must equal number of actuators in model.')
 end
 
@@ -42,7 +46,7 @@ for i=1:numActuators
     s(i)=SimmSpline();
     
     for mc=1:numTimePts
-        s(i).addPoint(tp(mc),P(mc,i)); 
+        s(i).addPoint(tpWith0(mc),PWith0(mc,i)); 
     end
     fSet(i).set(0,s(i));
     %fSet.setName(['OptFunc_' muscleName]);

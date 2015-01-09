@@ -41,20 +41,17 @@ m.osimModel.initSystem();
 % Unflatten the controls vector to a matrix (columns are controls, rows are
 % times for the spline
 
-i=find(Pv>1);
-Pv(i)=1;
-
-i=find(Pv<0);
-Pv(i)=0;
 
 Pm=reshape(Pv,[],length(m.tp))';
 
+tp=[0 m.tp];
+Pm=[m.PInit ;Pm];
 
 if isequal(m.lastPm,Pm)
     modelResults = m.lastModelResults;
 else
     modelResults = runOpenSimModel(m.osimModel, m.controlsFuncHandle,...
-        m.timeSpan, m.integratorName, m.integratorOptions,m.tp,Pm, ...
+        m.timeSpan, m.integratorName, m.integratorOptions,tp,Pm, ...
         m.constObjFuncName);
     m.lastPm=Pm;
     m.lastModelResults=modelResults;
@@ -80,7 +77,7 @@ display([datestr(now,13) ' Objective: ' sprintf('%f ',obj) '(' ...
 %Update the log file.
 if ~isempty(m.saveLog)
     data.functionType=1;
-    data.P=Pv;
+    data.P=Pm;
     data.modelResults=modelResults;
     data.runCnt=m.runCnt;
     data.obj=obj;

@@ -33,6 +33,8 @@ m.osimModel.initSystem();
 % times for the spline
 Pm=reshape(Pv,[],length(m.tp))';
 
+tp=[0 m.tp];
+Pm=[m.PInit ;Pm];
 
 if isequal(m.lastPm,Pm)
     modelResults = m.lastModelResults;
@@ -63,7 +65,7 @@ display([datestr(now,13) ' Constarints: ' sprintf('%f ',constr) '(' num2str(m.ru
 %Update the logfile
 if ~isempty(m.saveLog)
     data.functionType=3;
-    data.P=Pv;
+    data.P=Pm;
     data.modelResults=modelResults;
     data.runCnt=m.runCnt;
     data.obj=[];

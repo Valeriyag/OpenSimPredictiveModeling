@@ -26,17 +26,27 @@ import org.opensim.modeling.*;
 for i=2:size(motionData.data,2)
     osimState.updY().set(i-2, motionData.data(end,i));
 end
-osimModel.computeStateVariableDerivatives(osimState);
+osimModel.computeStateVariableDerivatives(osimState);   
+%Is this needed?  The model should be at it's final state.  Mtg with Ton 12-17-14
+%Yes it is needed or the model is not realized all the way through
+%acceleration (Position and velocity Calcs below fail).
 
-%massCenter = Vec3(0.0,0.0,0.0);
+massCenter = Vec3(0.0,0.0,0.0);
 velocity   = Vec3(0.0,0.0,0.0);
 position = Vec3(0.0,0.0,0.0);
 bodySet = osimModel.getBodySet();
-%bodySet.get('r_ulna_radius_hand').getMassCenter(massCenter);
-massCenter=bodySet.get('r_ulna_radius_hand').getMassCenter();
+bodySet.get('r_ulna_radius_hand').getMassCenter(massCenter);
 simbodyEngine = osimModel.getSimbodyEngine();
 simbodyEngine.getVelocity(osimState, osimModel.getBodySet().get('r_ulna_radius_hand'), massCenter, velocity);
 simbodyEngine.getPosition(osimState, osimModel.getBodySet().get('r_ulna_radius_hand'), massCenter, position);
+
+
+% massCenter=bodySet.get('r_ulna_radius_hand').getMassCenter();
+% simbodyEngine = osimModel.getSimbodyEngine();
+% simbodyEngine.getVelocity(osimState, osimModel.getBodySet().get('r_ulna_radius_hand'), massCenter, velocity);
+% simbodyEngine.getPosition(osimState, osimModel.getBodySet().get('r_ulna_radius_hand'), massCenter, position);
+
+
 
 %Objective Maximize the velocity in the +y direction
 objective=-velocity.get(1);  %Neg because IPOPT minimizes
@@ -60,7 +70,7 @@ constraints(4)=max(motionData.data(:,ind));   % This 3rd column is the elbow ang
 %ind = getStateVarIndex( motionData.labels,'r_shoulder/r_shoulder_elev/r_shoulder_elev');
 % Shoulder Joint Never Hyper Extend
 ind=2;
-constraints(5)=min(motionData.data(:,ind));   % This 3rd column is the elbow angle.  If the model changes, this will need to be updated.
+constraints(5)=min(motionData.data(:,ind));   % This 3rd column is the elbow angle.  If the model changes, this will need to be updated.   %Fix these comments Mtg with Ton 12-17-14
 constraints(6)=max(motionData.data(:,ind));   % This 3rd column is the elbow angle.  If the model changes, this will need to be updated.
 
 

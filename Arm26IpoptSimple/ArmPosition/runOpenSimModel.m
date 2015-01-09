@@ -1,13 +1,13 @@
 function modelResults = evaluateOpenSimModel(osimModel, controlsFuncHandle,...
     timeSpan, integratorName, integratorOptions,tp,P,constObjFuncName)
-%evaluateOpenSimModel- evaluate (perform integration and calculate 
+%evaluateOpenSimModel- evaluate (perform integration and calculate
 %   constarinats and objective) of an OpenSim model.  Use the function in
 %   controlsFuncHandle to calculate the control values at integrator time
 %   steps.
 %
 %   modelResults = evaluateOpenSimModel(osimModel, controlsFuncHandle,...
 %       timeSpan, integratorName, integratorOptions,tp,P,constObjFuncName)
-%    
+%
 %    Inputs:
 %       osimModel: An opensim model object
 %       controlsFunctionHandle:  A handle to model specific function that
@@ -18,7 +18,7 @@ function modelResults = evaluateOpenSimModel(osimModel, controlsFuncHandle,...
 %       integratorName: String containg the name of the integrator to be
 %           used.  For example: 'ode15s'
 %       integratorOptions: Structure containing integrator options.  See
-%           ode15s for examples.  
+%           ode15s for examples.
 %           integratorOptions = odeset('AbsTol', (1E-05), 'RelTol', (1E-03));
 %       tp:  A vector of times at which the control values are provided.
 %       P:  Control value Inputs into the model.  Matrix where:
@@ -33,9 +33,9 @@ function modelResults = evaluateOpenSimModel(osimModel, controlsFuncHandle,...
 % Import Java libraries
 import org.opensim.modeling.*;
 
-if isempty(osimModel)
-osimModel = Model('temp.osim');
-osimState = osimModel.initSystem();
+if isempty(osimModel)  %remove 12-1-14 Meeting with Ton
+    osimModel = Model('temp.osim');
+    osimState = osimModel.initSystem();
 end
 % Integrate the Plant Model
 [OutputData,osimState]= integrateOpenSimPlant(osimModel, controlsFuncHandle, timeSpan, ...
@@ -43,7 +43,7 @@ end
 
 modelResults.OutputData=OutputData;
 
-if ~isempty(constObjFuncName)  
+if ~isempty(constObjFuncName)
     % Calculate constraints and objective
     constObjFuncHandle=str2func(constObjFuncName);
     [objective,constraints]=constObjFuncHandle(osimState,osimModel,OutputData);

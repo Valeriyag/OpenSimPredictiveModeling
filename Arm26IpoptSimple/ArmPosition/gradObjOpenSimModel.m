@@ -32,22 +32,28 @@ m.osimModel.initSystem();
 % times for the spline
 Pm=reshape(Pv,[],length(m.tp))';
 
+tp=[0 m.tp];
+Pm=[m.PInit ;Pm];
+
 %Evalute the model (Integrate and calculate obj/const)
 if isequal(m.lastPm,Pm) && ~isempty(m.lastGradObj)
     modelResults = m.lastModelResults;
     gradObj=m.lastGradObj;
+    gradModelResultsOut=[];
 else
     modelResults = runOpenSimModel(m.osimModel, m.controlsFuncHandle,...
         m.timeSpan, m.integratorName, m.integratorOptions,m.tp,Pm, ...
         m.constObjFuncName);
     %Using the above evaluation as a starting, get the gradient
-    [gradObj,jacConst]=evalGradOpenSimModel(modelResults,m.osimModel, m.controlsFuncHandle,...
+    [gradObj,jacConst,gradModelResultsOut]=evalGradOpenSimModel(modelResults,m.osimModel, m.controlsFuncHandle,...
         m.timeSpan, m.integratorName, m.integratorOptions,m.tp,Pm,m.constObjFuncName,m.h);
+    
     
     m.lastPm=Pm;
     m.lastModelResults=modelResults;
     m.lastGradObj=gradObj;
     m.lastJacConst=jacConst;
+    m.gradModelResultsOut=gradModelResultsOut;
 end
 
 
@@ -70,7 +76,7 @@ end
 %Update the log file to include this step
 if ~isempty(m.saveLog)
     data.functionType=2;
-    data.P=Pv;
+    data.P=Pm;
     data.modelResults=modelResults;
     data.runCnt=m.runCnt;
     data.obj=[];
@@ -78,6 +84,7 @@ if ~isempty(m.saveLog)
     data.constr=[];
     data.jacConst=[];
     data.time=now;
+    data.gradModelResultsOut=gradModelResultsOut;
     varName=['log' num2str(m.runCnt)];
     eval([varName '=data;']);
     save(m.saveLog,varName,'-append')

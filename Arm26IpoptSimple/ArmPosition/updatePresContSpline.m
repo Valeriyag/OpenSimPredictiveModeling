@@ -20,7 +20,7 @@ for contCnt=1:numActuators  %Loop through the controllers (actuators)
     
     % xValues are already set - Assumed
     
-    for pCnt=1:size(P,1)  %Loop through the points and update the spline values
+    for pCnt=2:size(P,1)  %Loop through the points and update the spline values
         myFunc.setY(pCnt-1,P(pCnt,contCnt));
     end
     
